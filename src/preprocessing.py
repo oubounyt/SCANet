@@ -3,6 +3,7 @@ import typing
 import pathlib
 import warnings
 import numpy as np
+import scipy
 import scanpy as sc
 from turtle import up
 import seaborn as sns
@@ -12,8 +13,9 @@ from pathlib import Path, PurePath
 from typing import Optional, Union, Tuple
 
 # scanpy styles
+# verbosity: errors (0), warnings (1), info (2), hints (3)
 sns.set_theme(style="white")
-sc.settings.verbosity = 3             # verbosity: errors (0), warnings (1), info (2), hints (3)
+sc.settings.verbosity = 3 
 sc.logging.print_header()
 sc.settings.set_figure_params(dpi=100, facecolor='white')
 
@@ -25,7 +27,7 @@ class Preprocessing():
     @staticmethod
     def _intial(adata: AnnData):
         adata.var_names_make_unique()
-        adata.var['mt'] = adata.var_names.str.startswith('MT-') # Annotate the group of mitochondrial genes as 'mt'
+        adata.var['mt'] = adata.var_names.str.startswith('MT-') 
         mito_genes = adata.var_names.str.startswith('MT-')
         adata.obs['percent_mito'] = np.sum(adata[:, mito_genes].X, axis=1).A1 / np.sum(adata.X, axis=1).A1  
         sc.pp.calculate_qc_metrics(adata, qc_vars=['mt'], percent_top=None, inplace=True)
@@ -37,11 +39,11 @@ class Preprocessing():
         return adata
     
     @classmethod
-    def read_h5ad(cls, filename: Union[Path, str]):
+    def read_h5ad(cls, filename: Union[Path, str], pr_process:str = "skip"):
         if pathlib.Path(filename).suffix != ".h5ad":
             raise ValueError('Please provide a .h5ad format file')
         adata = sc.read_h5ad(filename)
-        if '__SCANclusters__' in list(adata.obs) \
+        if pr_process== "skip" or '__SCANclusters__' in list(adata.obs) \
         or ['mt', 'n_cells_by_counts', 'mean_counts', 'log1p_mean_counts', 'pct_dropout_by_counts'] in list(adata.var):
             return sc.read_h5ad(filename)
         else:

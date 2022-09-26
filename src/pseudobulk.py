@@ -28,26 +28,35 @@ class Pseudobulk():
             
         for x in to_del:
             adata = adata[adata.obs[cell_anno] != x]
-            
-        data = pd.DataFrame.sparse.from_spmatrix(adata.X, index=list(adata.obs[cell_anno]))
-        for c in list(data.columns):
-            data[c] = data[c].values.to_dense().astype(np.float64)
 
-        gene_names = list(adata.var_names)  #TODO How to get genes in a general way
+        print("data type: " + str(type(adata.X).__name__))
+        if type(adata.X).__name__ == 'SparseCSRView':
+            data = pd.DataFrame.sparse.from_spmatrix(adata.X, index=list(adata.obs[cell_anno]))
+            for c in list(data.columns):
+                data[c] = data[c].values.to_dense().astype(np.float64)
+        else:
+            data = pd.DataFrame(data = adata.X, index = list(adata.obs[cell_anno]))
+
+        gene_names = list(adata.var_names) 
         groups = data.groupby(data.index)
-        
+
         dfs = [] #reduce cluster sizes
         for name, group in groups:
             g = group
             arr_ = g.to_numpy()
             kmeans = KMeans(n_clusters=num_rep_cells)
             kmeans.fit(arr_)
-            kmeans.predict(arr_)
+            clusters_ = kmeans.predict(arr_)
+            df_ = pd.DataFrame(arr_)
+            df_.insert (0, "clusters_", clusters_)
+            df2 = df_.groupby('clusters_').mean()
+            df2.columns = gene_names
+            df2.insert (0, "clusters", name)
             centers = kmeans.cluster_centers_
             df = pd.DataFrame(data=centers, columns=gene_names)
             df.insert (0, "clusters", name)
-            dfs.append(df)
-        
+            dfs.append(df2)
+
         new_data = pd.concat(dfs, ignore_index=True)
         new_data = new_data.set_index('clusters')
 
@@ -58,9 +67,6 @@ class Pseudobulk():
                                        columns=["Genes"]))
         reduced_data.var_names_make_unique()  
         reduced_data.obs_names_make_unique()  
-        # NOW the data is processed dont check for HIghly variable genes anymore
-        #reduced_data.obs["_processed_"] = "TRUE"
-        #print(reduced_data)
         print(f'\nSelected representative cells for each cluster {reduced_data.obs.groupby(["__SCANclusters__"]).size()}')
         return reduced_data
 

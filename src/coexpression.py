@@ -32,11 +32,6 @@ class CoExpression():
 
     # Co-Expression analysis some partes will be done using R packages
     
-    # TODO 
-    # print('TODO paramters everywhere and best way to take them')
-    # print("TODO scilent any R output [use quite]")
-    # TODO fix all directories
-    
     cwd = os.getcwd() # creat an output folder
     path_outs = os.path.join(cwd, "outs_scan")
     if not os.path.exists(path_outs):
@@ -59,12 +54,8 @@ class CoExpression():
         for p in sys.path:
             if p[-8:] == "SCAn/src":
                 path_r_script = os.path.join(p,"script.R")
-        #print(path_r_script)
-        # Defining the R script and loading the instance in Python
         with cls.suppress_stdout():
-            #print("mute")
             r = ro.r
-            #print("This should be automatic")
             r['source'](path_r_script)
         
         func_name_r = ro.globalenv[func_name]
@@ -75,11 +66,7 @@ class CoExpression():
     def convertor(adata_new, convertor_r):
 
         data = pd.DataFrame(adata_new.X, index=list(adata_new.obs_names), columns=list(adata_new.var_names))
-        #print(data)
-        #data = data.apply(np.exp)
-        #print("After")
         annotation = adata_new.obs
-        #print(data)
         print(f'Data dimension is : {data.shape[0]} Cells and {data.shape[1]} Genes')
         with localconverter(ro.default_converter + pandas2ri.converter):
             data_r = ro.conversion.py2rpy(data)
@@ -166,9 +153,6 @@ class CoExpression():
             data.append([x, len(genes), json.dumps(genes)])
 
         out_df = pd.DataFrame (data, columns=["Module_r","n_genes","genes"])
-        #out_df = out_df.astype({"genes": object})
-        #print("ddf colmun data types")
-        #print(out_df.dtypes)
         return out_df
 
     @classmethod
@@ -178,22 +162,19 @@ class CoExpression():
         plot_modules_r = cls.call_r_function("plot_modules_r")
         genes_and_modules_df = plot_modules_r(net, cls.path_outs, w=400, h=400)
         with localconverter(ro.default_converter + pandas2ri.converter):
-            #frequency_df_ = ro.conversion.rpy2py(frequency_df)
             genes_and_modules_df_ = ro.conversion.rpy2py(genes_and_modules_df)
-        #display(Image(filename='modules_plot.png'))
 
         frequency_df_ = cls.r_2_py(genes_and_modules_df_)
         m = cls.mapper(frequency_df_)
         genes_frequency_df = pd.DataFrame (m, columns=["Module_r","n_genes","genes","Modules"])
-        #genes_frequency_df.plot(kind="bar",y="n_genes", x="Modules", title="Number of genes in MODULES", figsize=figsize)
         ax = genes_frequency_df.plot(kind='bar', x="Modules",y='n_genes', figsize=figsize, 
                                      legend=False, title='Number of genes per module')
         for bar in ax.patches:
             ax.annotate(format(bar.get_height(), '.0f'),
                         (bar.get_x() + bar.get_width() / 2,
                             bar.get_height()), ha='center', va='center',
-                        size=12, xytext=(0, 8),
-                        textcoords='offset points')
+                        size=12, xytext=(0,12),
+                        textcoords='offset points', rotation=90)
 
 
         ax.set_yticks([])
@@ -202,20 +183,18 @@ class CoExpression():
         ax.spines['left'].set_visible(False)
         plt.show()
         genes_frequency_df.to_csv(cls.path_outs+"/genes_frequency_df.csv")
-        print("TODO remove this df from return")
         
-        #return genes_frequency_df
-        # Hide R things
-        genes_frequency_df_re= genes_frequency_df[["Modules","n_genes","genes"]]
-        return genes_frequency_df_re
+        return genes_frequency_df
+    
     @classmethod
-    def modules_to_annotation_cor(cls, adata_new: AnnData, net: robjects, figsize: Optional[Tuple[float, float]]=(9,6)):
+    def modules_to_annotation_cor(cls, adata_new: AnnData, net: robjects, cor_method: str,
+                                  figsize: Optional[Tuple[float, float]]=(9,6)):
         
         convertor_r = cls.call_r_function('convertor_r')
         final_exp_ = cls.convertor(adata_new, convertor_r)
 
         module_to_annotation_cor_r = cls.call_r_function("module_to_annotation_cor_r")
-        MEtrait = module_to_annotation_cor_r(final_exp_, net, cor_method="spearman")
+        MEtrait = module_to_annotation_cor_r(final_exp_, net, cor_method=cor_method)
         with localconverter(ro.default_converter + pandas2ri.converter):
             MEtrait_ = ro.conversion.rpy2py(MEtrait)
         
@@ -242,7 +221,6 @@ class CoExpression():
         pd.options.mode.chained_assignment = None
         df['positive'] = df['cor'] > 0
         pd.options.mode.chained_assignment = "warn"
-        #df.plot(kind='barh', x="annotation", y="cor", color=df.positive.map({True: 'r', False: 'b'}), figsize=figsize)
         ax = df.plot(kind='barh', x="annotation",y='cor', figsize=figsize, legend=False, 
                      color=df.positive.map({True: 'r', False: 'b'}), width=.5,
              title='Module to annotation correlation')
@@ -271,9 +249,6 @@ class CoExpression():
         df = pd.read_csv(cls.path_outs+"/genes_frequency_df.csv", index_col=0)
         genes = list(df[df["Modules"] == module]["genes"])
         genes = json.loads(genes[0])
-        #print("TODO was an erro some genes where not in the var-names!!!")
-        #print("these genes")
-        #print([x for x in genes if x not in list(adata_new.var_names)])
         genes = [x for x in genes if x in list(adata_new.var_names)]
         adata_M_genes = adata_new[:, genes]   
 
@@ -287,9 +262,6 @@ class CoExpression():
         ax = sns.violinplot(data=res)
         ax.set_xticklabels(ax.get_xticklabels(),rotation = 90)
         ax.set(xlabel='Modules', ylabel='Avrage gene expression')
-        #ax.spines['right'].set_visible(False)
-        #ax.spines['top'].set_visible(False)
-        #ax.spines['left'].set_visible(False)
         plt.show()
     
     @classmethod
@@ -317,8 +289,6 @@ class CoExpression():
 
         MEs_ = MEs_.rename(columns=Convert_to_dict(names__))
         MEs_ = annotation.join(MEs_)
-        #print('TODO tiltle and look into the plot')
-        #print('TODO other paramters should also be added for the ploting **kwargs')
         MEs_.boxplot(by='__SCANclusters__', rot=90, grid=False, fontsize=15, figsize=figsize)
         title_boxplot = 'awesome title'
         plt.title( title_boxplot )
@@ -332,15 +302,12 @@ class CoExpression():
         if plot_type== "box":
             df_ = df[[module,'__SCANclusters__']]
             boxplot = df_.boxplot(by='__SCANclusters__', rot=90, grid=False, fontsize=12, figsize=figsize, return_type=None)
-            #return boxplot
         elif plot_type == "violin":
             df_ = df[[module,'__SCANclusters__']]
             plt.figure(figsize=figsize)
             ax = sns.violinplot(x="__SCANclusters__", y=module, data=df_)
             ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
-            #return ax
     
-    #print("TODO add [gene_significance] function here.")
     
     @classmethod
     def hub_genes(cls, adata: AnnData, net: robjects, figsize: Optional[Tuple[float, float]]=(8,8)):
@@ -390,7 +357,6 @@ class CoExpression():
         module_ = [x[0] for x in names_ if x[2]==module]
 
         edges = module_to_network_r(net, module=module_[0], co_cutoff=co_cutoff)
-        #display(Image(filename='outs/scale_free_topology.png'))
 
         with localconverter(ro.default_converter + pandas2ri.converter):
             edges_filtered = ro.conversion.rpy2py(edges)
@@ -399,7 +365,6 @@ class CoExpression():
         lis_ = list(edges_filtered["Gene1"])+list(edges_filtered["Gene2"])
         lis_ = list(set(lis_))
         print(f'There are {len(lis_)} unique genes')
-        #print(f'There are x hub genes genes')
         edges_filtered["Module"] = module
 
         return edges_filtered
@@ -429,9 +394,6 @@ class CoExpression():
             network_r = ro.conversion.py2rpy(network)
         network_statistics_r = network_statistics_r(network_r)
 
-        # with localconverter(ro.default_converter + pandas2ri.converter):
-        #     network_statistics = ro.conversion.rpy2py(network_statistics_r)
-        
         return dict(zip(network_statistics_r.names, map(list,list(network_statistics_r))))
     
     @classmethod
@@ -499,8 +461,6 @@ class CoExpression():
         powers = rpy2.robjects.IntVector(powers)
         outputs = module_conservation_r(final_exp_, samples__, nPerm, powers)
         
-        #display(Image(filename='power_plot_consensus_modules.png')) 
-
         outputs_ = list(outputs)[0]
         message_ = dict(zip(outputs_.names, map(list,list(outputs_))))
         message_ = message_["message"]

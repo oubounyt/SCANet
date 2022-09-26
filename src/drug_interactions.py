@@ -10,10 +10,10 @@ class DrugInteractions:
             "target": "drug",
             "algorithm": algorithm
         }
-        #TODO: Find more broken genes
+        # TODO: Find more broken genes
         broken_genes = ['APOLD1', 'KCNK17', 'ZNF155','ZNF619', 'ZNF235', 'ZNF468', 'CENPL', 'FAM76A', 'APOBEC3H']
         genes = [gene for gene in genes if gene not in broken_genes]
-
+        
         task = new_task(genes, parameters)
         gene_edges_dir = []
         r = task.get_result()
@@ -30,14 +30,17 @@ class DrugInteractions:
         gene_edges_undir = []
         if only_direct:
             gene_drugs = {gene:r.get_genes()[gene] for gene in r.get_genes().keys() if gene in genes}
-        #only get the genes
+            print(gene_drugs)
         else:
             
             for source in gene_drugs.keys():
-                gene_edges_dir += [(source, target) for target in gene_drugs[source]['has_edges_to'] if target in gene_drugs.keys()]
+                gene_edges_dir += [(source, target) for target in gene_drugs[source]['has_edges_to'] if 
+                                   target in gene_drugs.keys()]
 
         for gene in gene_drugs.keys():
             drug_edges[gene] = {drug:drugs[drug]["score"] for drug in gene_drugs[gene]['has_edges_to'] if drug in drugs.keys()}
+        
+
         return drug_edges, gene_edges_dir
 
     @staticmethod

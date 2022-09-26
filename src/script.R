@@ -23,9 +23,7 @@ convertor_r <- function(data_r, annotation_r){
 
 plot_power_r <- function(final_exp, path, network_type="unsigned", cor_method="pearson", w=400, h=400){
     
-    #pick up soft threshould
-    #print("path")
-    #print(path)
+
     path_ = paste(path, "/power_plot.png", sep = "")
     png(file = path_, width = w, height = h) 
     quiet(sft <- SFT_fit(final_exp, net_type=network_type, cor_method=cor_method))
@@ -70,7 +68,6 @@ plot_modules_r <- function(net, path, w, h){
     print(plot_ngenes_per_module(net))
     dev.off()
     genes_and_modules <- net$genes_and_modules
-    #frequency_df <- as.data.frame(table(genes_and_modules$Modules), stringsAsFactors=FALSE)
     return(genes_and_modules)
 
 }
@@ -102,20 +99,10 @@ hub_genes_r <- function(final_exp, net){
 module_to_network_r <- function(net, module, co_cutoff){
 
     
-    #png(file = "outs/scale_free_topology.png", width = 400, height = 400) 
-    #edges_filtered <- get_edge_list(net, module=module, filter=TRUE, method="min_cor")
-    #dev.off()
-    #invisible(capture.output(edges <- get_edge_list(net, module="black", filter=TRUE)))
-    #quiet(edges <- get_edge_list(net, module=module, filter=TRUE), all = TRUE)
-    #print("Here ...")
-    
     edges_filtered <- get_edge_list(net, module=module, filter=TRUE, method="min_cor", rcutoff = co_cutoff)
-
     if (dim(edges_filtered)[1] != 0){message_fit = capture_message(check_SFT(edges_filtered))
                                     m = message_fit[1]$message
                                     cat(m)}
-    
-
     
     return(edges_filtered)
 
@@ -124,7 +111,6 @@ module_to_network_r <- function(net, module, co_cutoff){
 network_statistics_r <- function(edges_filtered){
 
     adjacency_matrix_from_data_frame <- function(dat, symmetric = TRUE,node_columns = c(1, 2)) {
-        # length of node columns must be exactly two (pairwise interactions)
         if (length(node_columns) != 2) {
             stop("length of `node_columns` must be exactly 2")
         }
@@ -187,7 +173,7 @@ data_list <-split(DF, f = DF$X__clusters__)
 print(length(data_list))
 print(names(data_list))
 
-# getting data from samples
+# Getting data from samples
 print("")
 print("getting data from samples")
 
@@ -285,7 +271,6 @@ for (i in samples) {
     a = subset(a, select = -c(rowname,X__clusters__) )
     a= t(a)
     print(dim(a))
-    #list_df <- c(list_df, a)
     tmp <- SummarizedExperiment(a, colData = annota_)
     n = annota_$annota_
     n = n[1]
@@ -298,17 +283,6 @@ for (i in samples) {
 #names(list_SummarizedExperiment) <- list_names
 exp_ <- lapply(list_SummarizedExperiment, function(x) ZKfiltering(x))
 exp_ <- lapply(exp_, function(x) PC_correction(x))        
-#power_ortho <- lapply(exp_, SFT_fit, cor_method="pearson")
-#new
-#print("new")
-#cons_sft <- consensus_SFT_fit(list_SummarizedExperiment, setLabels = c("Maize 1", "Maize 2"), cor_method = "pearson")
-#powers <- cons_sft$power
-#print(powers)
-#png(file = "power_plot_consensus_modules.png", width = 800, height = 400) 
-#print(cons_sft$plot)
-#dev.off()
-#print("end new")
-#end new
 
 consensus <- consensus_modules(list_SummarizedExperiment, power = powers, cor_method = "spearman")
 print(head(consensus$genes_cmodules))
@@ -385,18 +359,6 @@ exp_ <- lapply(list_SummarizedExperiment, function(x) ZKfiltering(x))
 exp_ <- lapply(exp_, function(x) PC_correction(x))  
                
 power_ortho <- lapply(list_SummarizedExperiment, SFT_fit, cor_method="pearson")
-#new
-# print("new")
-# cons_sft <- consensus_SFT_fit(list_SummarizedExperiment, setLabels = c("Maize 1", "Maize 2"), cor_method = "pearson")
-# powers <- cons_sft$power
-# print(powers)
-# png(file = "power_plot_consensus_modules.png", width = 800, height = 400) 
-# print(cons_sft$plot)
-# dev.off()
-# print("end new")
-#end new
-
-#plot powers
 png(file = "outs/power_plot_conservation_1.png", width = 800, height = 400) 
 print(power_ortho[[1]]$plot)
 dev.off()
@@ -424,7 +386,6 @@ consrv_module_to_network_r <- function(data, module, co_cutoff){
 
     
     png(file = "outs/consrv__scale_free_topology.png", width = 400, height = 400) 
-    #invisible(capture.output(edges <- get_edge_list(net, module="black", filter=TRUE)))
     quiet(edges <- get_edge_list(data[[2]], module=module, filter=TRUE), all = TRUE)
     edges_filtered <- get_edge_list(data[[2]], module=module, filter=TRUE, method="min_cor", rcutoff = co_cutoff)
     dev.off()

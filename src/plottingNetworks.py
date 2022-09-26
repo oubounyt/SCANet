@@ -28,8 +28,12 @@ class Plot:
     @classmethod
     def plot_gcn(cls, network_: DataFrame, hub_genes_df: DataFrame, name: str, 
                  drug_interaction: str, smooth_edges: bool = True):
+        
+        # print hub genes
         hubgenes = list(hub_genes_df[hub_genes_df['Modules'] == list(network_["Module"])[0]]['Gene'])
         print("Hub genes: " + str(hubgenes))
+        
+        # plot the gcn network 
         graph = nx.from_pandas_edgelist(network_, "Gene1","Gene2")
         graph.remove_edges_from(nx.selfloop_edges(graph))
         network = Network(height='500px', width='800px', directed=False, notebook=True)
@@ -40,16 +44,20 @@ class Plot:
             if gene in net_genes:
                 network.get_node(gene)["color"] = 'orangered'
 
-        
+        # drug interaction
         if drug_interaction == 'direct':
-            drug_interactions, _ = DrugInteractions.get_drug_interactions(net_genes, 'degree', only_direct=True)
+            drug_interactions, _ = DrugInteractions.get_drug_interactions(net_genes, "degree",
+                                                                              only_direct=True)
+            print(drug_interactions)
             for gene in drug_interactions:
                 for drug in drug_interactions[gene]:
                     network.add_node(drug, shape='star', color='darkgreen')
                     network.add_edge(gene,drug)
 
         elif drug_interaction == 'all':
-            drug_interactions, gene_edges_dir = DrugInteractions.get_drug_interactions(net_genes, 'degree', only_direct=False)
+            drug_interactions, gene_edges_dir = DrugInteractions.get_drug_interactions(net_genes, 
+                                                                                       ["trustrank", "closeness", "degree"],
+                                                                                       only_direct=False)
             #filter out all genes already in the network
             new_genes = [new_gene for new_gene in drug_interactions if new_gene not in net_genes]
             #new_genes = [edge[0] for edge in new_genes if new_gene not in network.get_nodes()]
