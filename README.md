@@ -31,6 +31,7 @@ import scanet as sn
 
 ## Usage
 
-<p A full detailed example of `SCANet` is here [Jupyter Notebook](https://github.com/oubounyt/SCAn/blob/main/docs/full-example.ipynb)</p>
+A full detailed example of `SCANet` is here [Jupyter Notebook](https://github.com/oubounyt/SCAn/blob/main/docs/full-example.ipynb)
+
 
 In this [Jupyter Notebook](https://github.com/oubounyt/SCAn/blob/main/docs/full-example.ipynb), we explored all aspects of gene coexpression networks (GCNs) using `SCANet` through a full analysis of the 3k PBMCs from 10x Genomics.
