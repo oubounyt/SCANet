@@ -1,4 +1,4 @@
-# SCANet
+# SCANet: A workflow for single-cell co-expression based analysis 
 
 <p align="center">
   <img src="https://github.com/oubounyt/SCAn/blob/main/logo_.png" width="400"/>
