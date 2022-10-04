@@ -1,4 +1,5 @@
-[![PyPI](https://img.shields.io/pypi/?logo=PyPI)]([https://pypi.org/project/scanpy](https://test.pypi.org/project/scanet/))
+[![PyPI](https://img.shields.io/pypi/v/scanpy?logo=PyPI)]([https://pypi.org/project/scanpy](https://test.pypi.org/project/scanet/))
+
 
 
 
