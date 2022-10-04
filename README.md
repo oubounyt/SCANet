@@ -1,3 +1,7 @@
+[![PyPI](https://img.shields.io/pypi/v/scanpy?logo=PyPI)](https://pypi.org/project/scanpy)
+
+
+
 # SCANet: A workflow for single-cell co-expression based analysis 
 
 <p align="center">
