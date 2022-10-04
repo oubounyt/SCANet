@@ -28,3 +28,8 @@ import scanet as sn
 ```
 
 `SCANet` officially supports Python 3.6+.
+
+## Usage
+
+A full detailed example of scanet usage refere to this [Jupyter Notebook] (https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html)
+In this [Jupyter Notebook] (https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html), we explored all aspects of gene coexpression networks (GCNs) using SCANet through a full analysis of the 3k PBMCs from 10x Genomics.
