@@ -31,5 +31,5 @@ import scanet as sn
 
 ## Usage
 
-A full detailed example of scanet usage refere to this [Jupyter Notebook](https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html)
-In this [Jupyter Notebook](https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html), we explored all aspects of gene coexpression networks (GCNs) using SCANet through a full analysis of the 3k PBMCs from 10x Genomics.
+A full detailed example of scanet usage refere to this [Jupyter Notebook]([https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html](https://github.com/oubounyt/SCAn/blob/main/docs/full-example.ipynb))
+In this [Jupyter Notebook]([https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html](https://github.com/oubounyt/SCAn/blob/main/docs/full-example.ipynb)), we explored all aspects of gene coexpression networks (GCNs) using SCANet through a full analysis of the 3k PBMCs from 10x Genomics.
